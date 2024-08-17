@@ -1,0 +1,127 @@
+﻿@page "/"
+@using Microsoft.FluentUI.AspNetCore.Components
+
+<PageTitle>ป้ายส้ม</PageTitle>
+
+
+<FluentBodyContent>
+    <FluentDataGrid Id="manualGrid" GenerateHeader=GenerateHeaderOption.None GridTemplateColumns="84px 250px 84px" TGridItem="string" role="grid">
+    <FluentDataGridRow RowType="DataGridRowType.Header">
+        <FluentDataGridCell GridColumn="1" CellType="DataGridCellType.ColumnHeader" Style="text-align:center">ลด</FluentDataGridCell>
+            <FluentDataGridCell GridColumn="2" CellType="DataGridCellType.ColumnHeader" Style="text-align:center">ระยะเวลา</FluentDataGridCell>
+            <FluentDataGridCell GridColumn="3" CellType="DataGridCellType.ColumnHeader" Style="text-align:center">ราคา</FluentDataGridCell>
+    </FluentDataGridRow>
+    <FluentDataGridRow>
+        <FluentDataGridCell>30%</FluentDataGridCell>
+        <FluentDataGridCell>@StepRange30</FluentDataGridCell>
+        <FluentDataGridCell>@Step30</FluentDataGridCell>
+    </FluentDataGridRow>
+    <FluentDataGridRow>
+        <FluentDataGridCell>50%</FluentDataGridCell>
+        <FluentDataGridCell>@StepRange50</FluentDataGridCell>
+        <FluentDataGridCell>@Step50</FluentDataGridCell>
+    </FluentDataGridRow>
+    <FluentDataGridRow>
+        <FluentDataGridCell>70%</FluentDataGridCell>
+        <FluentDataGridCell>@StepRange70</FluentDataGridCell>
+        <FluentDataGridCell>@Step70</FluentDataGridCell>
+    </FluentDataGridRow>
+    <FluentDataGridRow>
+        <FluentDataGridCell>95%</FluentDataGridCell>
+        <FluentDataGridCell>@StepRange95</FluentDataGridCell>
+        <FluentDataGridCell>@Step95</FluentDataGridCell>
+    </FluentDataGridRow>
+    <FluentDataGridRow>
+        <FluentDataGridCell>ขายไม่ได้</FluentDataGridCell>
+        <FluentDataGridCell>@StepRangeEx</FluentDataGridCell>
+        <FluentDataGridCell>-</FluentDataGridCell>
+    </FluentDataGridRow>
+</FluentDataGrid>
+
+<FluentCard Style="width: 100%;" AreaRestricted="false">
+    <FluentTextField Style="min-width=250px" InputMode="InputMode.Numeric" ValueChanged="OnPriceInputChanged" Placeholder="ราคาเต็ม" Label="ราคาเต็ม" ImmediateDelay="100" Immediate="true"></FluentTextField>
+    <br />
+    <FluentDatePicker ValueChanged="OnDiscountDateChanged" View="CalendarViews.Days" Label="วันที่เริ่ม" />
+</FluentCard>
+
+</FluentBodyContent>
+
+@code {
+    private decimal price = 0;
+    private DateTime beginDiscount = DateTime.Today;
+
+    private string StepRange30 = string.Empty;
+    private string StepRange50 = string.Empty;
+    private string StepRange70 = string.Empty;
+    private string StepRange95 = string.Empty;
+    private string StepRangeEx = string.Empty;
+
+    private decimal Step30 = 0;
+    private decimal Step50 = 0;
+    private decimal Step70 = 0;
+    private decimal Step95 = 0;
+
+    decimal lastKnownPrice;
+
+    private void OnDiscountDateChanged(DateTime? input)
+    {
+        if (!input.HasValue)
+            return;
+        beginDiscount = input.Value;
+
+        OnDataChanged();
+    }
+
+    private void OnPriceInputChanged(string changed)
+    {
+        if (decimal.TryParse(changed, out decimal attempt))
+        {
+            price = attempt;
+            lastKnownPrice = attempt;
+        }
+        else
+        {
+            price = lastKnownPrice;
+        }
+        OnDataChanged();
+    }
+
+    private void OnDataChanged()
+    {
+        //First step
+        DateTime firstAdvance = beginDiscount.AddMonths(1);
+        StepRange30 = $"{beginDiscount:dd/MMM/yyyy} - {firstAdvance:dd/MMM/yyyy}";
+        Step30 = Math.Round(price - (price * 0.3m), MidpointRounding.AwayFromZero);
+
+        //Second step
+        DateTime secondAdvance = beginDiscount.AddMonths(1).AddDays(1);
+        DateTime secondAdvanceEnd = beginDiscount.AddMonths(2);
+        StepRange50 = $"{(secondAdvance):dd/MMM/yyyy} - {(secondAdvanceEnd):dd/MMM/yyyy}";
+        Step50 = Math.Round(price - (price * 0.5m), MidpointRounding.AwayFromZero);
+
+        //Third step
+        var thirdAdvance = beginDiscount.AddMonths(2).AddDays(1);
+        var thirdAdvanceEnd = beginDiscount.AddMonths(5);
+        StepRange70 = $"{(thirdAdvance):dd/MMM/yyyy} - {(thirdAdvanceEnd):dd/MMM/yyyy}";
+        Step70 = Math.Round(price - (price * 0.7m), MidpointRounding.AwayFromZero);
+
+        //Final step
+        var finalAdvance = beginDiscount.AddMonths(5).AddDays(1);
+        var finalAdvanceEnd = beginDiscount.AddMonths(6);
+        StepRange95 = $"{(finalAdvance):dd/MMM/yyyy} - {(finalAdvanceEnd):dd/MMM/yyyy}";
+        Step95 = Math.Round(price - (price * 0.95m), MidpointRounding.AwayFromZero);
+
+        //Expired
+        var expired = beginDiscount.AddMonths(6).AddDays(1);
+        StepRangeEx = $"{(expired):dd/MMM/yyyy}";
+    }
+
+    protected override void OnAfterRender(bool firstRender)
+    {
+        if (!firstRender)
+        {
+            OnDataChanged();
+        }
+        base.OnAfterRender(firstRender);
+    }
+}
