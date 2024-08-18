@@ -57,7 +57,7 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-0wRcZyKyjtze\/zbGZ4I1hUeATqWnLBE3Z43b\/Ps9eM8=",
+      "hash": "sha256-xCV5fnjlq3f+djOC5XtBIJgxaoKk5ogslCGZxQujVIA=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -125,7 +125,7 @@
       "url": "_framework\/Microsoft.JSInterop.WebAssembly.wasm"
     },
     {
-      "hash": "sha256-\/4+wZqAk+RWtbh9WHHQ31r+Lrre4ZiKzZo94BqPE8Oo=",
+      "hash": "sha256-yLgNJqL\/zG4TiFq9d7FKhpgLova2SPpa+zsLfdaNhX0=",
       "url": "_framework\/OrangePriceCalc.wasm"
     },
     {
@@ -365,5 +365,5 @@
       "url": "_content\/Microsoft.FluentUI.AspNetCore.Components\/Microsoft.FluentUI.AspNetCore.Components.lib.module.js"
     }
   ],
-  "version": "AVULwwVc"
+  "version": "QbHdllMY"
 };

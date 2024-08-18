@@ -1,7 +1,7 @@
 {
   "mainAssemblyName": "OrangePriceCalc",
   "resources": {
-    "hash": "sha256-F1cmhr18VdS6OQQ097hHhUdfpX9mR0Ib7z4qu0QO2kM=",
+    "hash": "sha256-k8OjHeWc05FlyeAU7dcIAtlZOp47ykxJ4gofBsM7nHA=",
     "jsModuleNative": {
       "dotnet.native.8.0.8.746giovk6l.js": "sha256-juC5sA7gHTLXFEhAKgdM2/RavswpwCtDfjYGsAz2FXg="
     },
@@ -33,7 +33,7 @@
       "Microsoft.FluentUI.AspNetCore.Components.wasm": "sha256-tJBAgUkJqBysNDr6GdxkXJmn9Wx/VhXRkqbE/aQouvo=",
       "Microsoft.JSInterop.wasm": "sha256-NFLR8czsByJ6RawxMo8Xk8W3ADJQRLwewVYIwpk76Nc=",
       "Microsoft.JSInterop.WebAssembly.wasm": "sha256-sLSiCKh0RQEV/2cl05tr7wOLWzExQfPZovvpqYLJduQ=",
-      "OrangePriceCalc.wasm": "sha256-/4+wZqAk+RWtbh9WHHQ31r+Lrre4ZiKzZo94BqPE8Oo=",
+      "OrangePriceCalc.wasm": "sha256-yLgNJqL/zG4TiFq9d7FKhpgLova2SPpa+zsLfdaNhX0=",
       "System.Collections.Concurrent.wasm": "sha256-nAhbzDg84QAKOp2qKo+Km6aZguT7kG8ijp03GzfRZVU=",
       "System.Collections.NonGeneric.wasm": "sha256-TVm6KmHultADY31ZQgqlVaIOLQJmJPJbbxxxOhfCKn0=",
       "System.Collections.Specialized.wasm": "sha256-m2muuXoiBG/hYOgSQpyDX/gdV+vHvgiLv12yBJvmIVc=",
