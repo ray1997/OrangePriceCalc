@@ -57,7 +57,7 @@
       "url": "_framework\/icudt_no_CJK.dat"
     },
     {
-      "hash": "sha256-j0zEAtGtY52yApXFRlObIeJJebmOHVozCh9OnLooHK8=",
+      "hash": "sha256-0wRcZyKyjtze\/zbGZ4I1hUeATqWnLBE3Z43b\/Ps9eM8=",
       "url": "_framework\/blazor.boot.json"
     },
     {
@@ -125,7 +125,7 @@
       "url": "_framework\/Microsoft.JSInterop.WebAssembly.wasm"
     },
     {
-      "hash": "sha256-1eSwr6fmcZ6wW54eJ47gpuWJt+8N4cXKfoQRhAyC4NI=",
+      "hash": "sha256-\/4+wZqAk+RWtbh9WHHQ31r+Lrre4ZiKzZo94BqPE8Oo=",
       "url": "_framework\/OrangePriceCalc.wasm"
     },
     {
@@ -197,7 +197,7 @@
       "url": "_framework\/System.ObjectModel.wasm"
     },
     {
-      "hash": "sha256-pzFqBsqi73\/JY\/qBnqO8KCXimDxGdWsVkZFbJgHawfs=",
+      "hash": "sha256-ElNQ4YRTRiNr9K7z68M0rA0Y6RCV64U8PL9CGNU6jOE=",
       "url": "_framework\/System.Private.CoreLib.wasm"
     },
     {
@@ -209,7 +209,7 @@
       "url": "_framework\/System.Runtime.InteropServices.JavaScript.wasm"
     },
     {
-      "hash": "sha256-9VGQT\/x8AE0jrsTUJWmJSRzjgMHnyMiYcxm630vTMw0=",
+      "hash": "sha256-lLqVEAhpwBQXMNxqs3SrYdd73mi9JbgaQgy1i93auK0=",
       "url": "_framework\/System.Runtime.wasm"
     },
     {
@@ -365,5 +365,5 @@
       "url": "_content\/Microsoft.FluentUI.AspNetCore.Components\/Microsoft.FluentUI.AspNetCore.Components.lib.module.js"
     }
   ],
-  "version": "uSlYM3Te"
+  "version": "AVULwwVc"
 };
