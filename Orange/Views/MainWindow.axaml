@@ -6,7 +6,6 @@
         xmlns:views="clr-namespace:Orange.Views"
         mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
         x:Class="Orange.Views.MainWindow"
-        Icon="/Assets/avalonia-logo.ico"
-        Title="Orange">
+        Title="คำนวณราคาสินค้าป้ายส้ม">
         <views:MainView />
 </Window>
