@@ -14,7 +14,11 @@ public static class Config
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
         if (!File.Exists(ConfigPath))
-            File.CreateText(ConfigPath).Write(defaultEmptyFile);
+        {
+            using var sw = File.CreateText(ConfigPath);
+            sw.Write(defaultEmptyFile);
+            sw.Close();
+        }
 
         foreach (var line in File.ReadAllLines(ConfigPath))
         {
