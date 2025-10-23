@@ -13,6 +13,9 @@ public static class Config
     {
         var dict = new Dictionary<string, string>(StringComparer.OrdinalIgnoreCase);
 
+        if (!File.Exists(ConfigPath))
+            File.CreateText(ConfigPath).Write(defaultEmptyFile);
+
         foreach (var line in File.ReadAllLines(ConfigPath))
         {
             var trimmed = line.Trim();
@@ -42,5 +45,10 @@ public static class Config
 
         return defaultValue;
     }
+
+    private const string defaultEmptyFile = $"""
+                                            {nameof(OrangeController.LatestJsonPath)}=/storage/media/configs/n8n/database/latest.json
+                                            {nameof(OrangeController.DatabasePath)}=/storage/media/configs/n8n/database/
+                                            """;
 
 }
