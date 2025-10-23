@@ -10,6 +10,13 @@
 
     <ItemGroup>
         <PackageReference Include="Microsoft.AspNetCore.OpenApi" Version="10.0.0-rc.1.25451.107"/>
+        <PackageReference Include="Microsoft.DotNet.ILCompiler" />
+        <PackageReference Include="Microsoft.NET.ILLink.Tasks" />
+        <PackageReference Include="System.Text.Json" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <PackageVersion Update="Microsoft.AspNetCore.OpenApi" Version="9.0.10" />
     </ItemGroup>
 
 </Project>
