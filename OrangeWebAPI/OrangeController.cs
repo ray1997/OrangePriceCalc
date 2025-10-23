@@ -49,7 +49,7 @@ public class OrangeController : ControllerBase
             }
             
             // Step 1: List all CSV files
-            var csvFiles = Directory.GetFiles(DatabasePath, "*.csv");
+            var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
             if (csvFiles.Length == 0)
                 return NotFound("No CSV files found.");
 
