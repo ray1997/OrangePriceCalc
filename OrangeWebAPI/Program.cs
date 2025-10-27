@@ -1,6 +1,27 @@
+using System.Threading.RateLimiting;
 using OrangeWebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
+builder.Services.AddRateLimiter(options =>
+{
+    options.RejectionStatusCode = StatusCodes.Status429TooManyRequests;
+
+    options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
+    {
+        if (context.Request.Path.StartsWithSegments("/api/60"))
+        {
+            return RateLimitPartition.GetFixedWindowLimiter(
+                context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+                factory => new FixedWindowRateLimiterOptions()
+                {
+                    AutoReplenishment = true,
+                    PermitLimit = 3,
+                    Window = TimeSpan.FromSeconds(1)
+                });
+        }
+        return RateLimitPartition.GetNoLimiter("unlimited");
+    });
+});
 //builder.Services.AddControllers();
 var app = builder.Build();
 
