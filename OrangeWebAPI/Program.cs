@@ -8,18 +8,14 @@ builder.Services.AddRateLimiter(options =>
 
     options.GlobalLimiter = PartitionedRateLimiter.Create<HttpContext, string>(context =>
     {
-        if (context.Request.Path.StartsWithSegments("/api/60"))
-        {
-            return RateLimitPartition.GetFixedWindowLimiter(
-                context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
-                factory => new FixedWindowRateLimiterOptions()
-                {
-                    AutoReplenishment = true,
-                    PermitLimit = 3,
-                    Window = TimeSpan.FromSeconds(1)
-                });
-        }
-        return RateLimitPartition.GetNoLimiter("unlimited");
+        return RateLimitPartition.GetFixedWindowLimiter(
+            context.Connection.RemoteIpAddress?.ToString() ?? "anonymous",
+            factory => new FixedWindowRateLimiterOptions()
+            {
+                AutoReplenishment = true,
+                PermitLimit = 2,
+                Window = TimeSpan.FromMilliseconds(500)
+            });
     });
 });
 //builder.Services.AddControllers();
