@@ -1,0 +1,16 @@
+[Unit]
+Description=Discount calculation API service
+After=network.target
+
+[Service]
+WorkingDirectory=/home/dietpi/discountapi
+ExecStart=/home/dietpi/discountapi/discountapi
+Restart=always
+RestartSec=5
+User=dietpi
+Group=dietpi
+Environment=DOTNET_RUNNING_IN_CONTAINER=false
+Environment=DOTNET_SYSTEM_GLOBALIZATION_INVARIANT=1
+
+[Install]
+WantedBy=multi-user.target
