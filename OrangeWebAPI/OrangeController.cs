@@ -22,7 +22,6 @@ public static class OrangeAPICore
 
     private static long LatestDatabaseUpdate = -1;
 
-    public record InitializeStatus(string message);
     public static IResult Initialize()
     {
         try
@@ -82,24 +81,40 @@ public static class OrangeAPICore
         }
     }
 
+    public class DiscountSteps(decimal initialPrice)
+    {
+        public decimal InitialPrice { get; private set; } = initialPrice;
+
+        public decimal FirstStep { get; private set; } = Calculate(initialPrice, 0.3m);
+        public decimal SecondStep { get; private set; } = Calculate(initialPrice, 0.5m);
+        public decimal ThirdStep { get; private set; } = Calculate(initialPrice, 0.7m);
+        public decimal ForthStep { get; private set; } = Calculate(initialPrice, 0.95m);
+
+        private static decimal Calculate(decimal price, decimal discount)
+        {
+            return Math.Round(price - (price * discount), MidpointRounding.AwayFromZero);
+        }
+    }
     public static IResult GetPriceInfo(decimal PriceOrSKU)
     {
         if (LoadedPriceInfo == null)
             return Results.NoContent();
+        
         if (PriceOrSKU is >= 60000000.00m and <= 61000000.00m && decimal.IsInteger(PriceOrSKU))
         {
-            if (!LoadedPriceInfo.ContainsKey((int)PriceOrSKU))
-                return Results.NotFound(new InitializeStatus("Database don't have this item price info"));
-            return Results.Ok(LoadedPriceInfo[(int)PriceOrSKU]);
+            return !LoadedPriceInfo.ContainsKey((int)PriceOrSKU) ? 
+                Results.Json("Database don't have this item price info", AppJsonContext.Default.String) : 
+                Results.Json(LoadedPriceInfo[(int)PriceOrSKU], AppJsonContext.Default.Decimal);
         }
-        return Results.Ok(0);
+        return Results.Json(new DiscountSteps(PriceOrSKU), AppJsonContext.Default.DiscountSteps);
     }
 
     public record DatabaseInfo(int UpdateDate, int Items);
 
     public static IResult GetDatabaseInfo()
     {
-        return Results.Ok(new DatabaseInfo((int)LatestDatabaseUpdate, LoadedPriceInfo?.Count ?? 0));
+        return Results.Json(new DatabaseInfo((int)LatestDatabaseUpdate, LoadedPriceInfo?.Count ?? 0),
+            AppJsonContext.Default.DatabaseInfo);
     }
 
     private static long? GetTrailingNumber(string fileName)
