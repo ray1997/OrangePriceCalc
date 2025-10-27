@@ -1,6 +1,7 @@
 using System.Globalization;
 using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
+using OrangeWebAPI.Helper;
 
 namespace OrangeWebAPI;
 
@@ -86,7 +87,7 @@ public class OrangeController : ControllerBase
             }
 
             // Step 4 + 6: Save to latest.json
-            var json = JsonSerializer.Serialize(items, new JsonSerializerOptions { WriteIndented = true });
+            var json = JsonSerializer.Serialize(items, AppJsonContext.Default.ListBasicPriceInfo);
             System.IO.File.WriteAllText(_latestJsonPath, json);
             
             //Save latest read info
