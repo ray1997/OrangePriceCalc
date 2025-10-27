@@ -4,14 +4,12 @@ using OrangeWebAPI.Helper;
 
 namespace OrangeWebAPI;
 
-[ApiController]
-[Route("/api")]
-public class OrangeController : ControllerBase
+public static class OrangeAPICore
 {
-    public Dictionary<int, decimal>? LoadedPriceInfo { get; set; }
+    public static Dictionary<int, decimal>? LoadedPriceInfo { get; set; }
 
-    private string _databasePath = string.Empty;
-    public string DatabasePath
+    private static string _databasePath = string.Empty;
+    public static string DatabasePath
     {
         get
         {
@@ -22,92 +20,89 @@ public class OrangeController : ControllerBase
         }
     }
 
-    [HttpGet("/{PriceOrSKU:decimal}")]
-    public IActionResult Get(decimal PriceOrSKU)
+    private static long LatestDatabaseUpdate = -1;
+    
+    public static IResult Initialize()
+    {
+        try
+    {
+        //No longer read and rewrite to json > load into memory instead:
+
+        // Step 1: List all CSV files
+        var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
+        if (csvFiles.Length == 0)
+            return Results.NoContent();
+
+        // Step 2: Find the file with the highest numeric suffix (yyyyMMdd)
+        var latestInfo = csvFiles
+            .Select(f => new
+            {
+                Path = f,
+                DateNum = GetTrailingNumber(Path.GetFileNameWithoutExtension(f))
+            })
+            .Where(x => x.DateNum != null)
+            .OrderByDescending(x => x.DateNum)
+            .FirstOrDefault();
+        if (latestInfo is null)
+            return Results.NotFound("Failed finding latest database files");
+        var latestFile = latestInfo.Path;
+        if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
+            return Results.Ok("Database updated!");
+        LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
+
+        if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
+            latestFile = string.Empty;
+
+        // Step 3: Read CSV
+        var lines = System.IO.File.ReadAllLines(latestFile);
+
+        //Initialize list
+        LoadedPriceInfo ??= [];
+
+        // Assuming CSV columns are comma-separated
+        foreach (var line in lines.Skip(1)) // skip header
+        {
+            var cols = line.Split(',');
+            if (cols.Length < 10) continue;
+
+            if (int.TryParse(cols[0], out var sku) &&
+                decimal.TryParse(cols[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
+            {
+                if (!LoadedPriceInfo.TryAdd(sku, price))
+                    LoadedPriceInfo[sku] = price;
+            }
+        }
+
+        // Step 7: Return OK
+        return Results.Ok(new
+        {
+            Message = "Initialization completed; Database updated!"
+        });
+    }
+    catch
+    {
+        return Results.StatusCode(500);
+    }
+    }
+
+    public static IResult GetPriceInfo(decimal PriceOrSKU)
     {
         if (LoadedPriceInfo == null)
-            return NoContent();
+            return Results.NoContent();
         if (PriceOrSKU is >= 60000000.00m and <= 61000000.00m && decimal.IsInteger(PriceOrSKU))
         {
             if (!LoadedPriceInfo.ContainsKey((int)PriceOrSKU))
-                return NotFound("Database don't have this item price info");
-            return Ok(LoadedPriceInfo[(int)PriceOrSKU]);
+                return Results.NotFound("Database don't have this item price info");
+            return Results.Ok(LoadedPriceInfo[(int)PriceOrSKU]);
         }
-        return Ok(0);
+        return Results.Ok(0);
     }
 
     private record DatabaseInfo(int UpdateDate, int Items);
 
-    [HttpGet("/dbinfo")]
-    public IActionResult LatestUpdate()
+    public static IResult GetDatabaseInfo()
     {
-        return Ok(new DatabaseInfo((int)LatestDatabaseUpdate, LoadedPriceInfo?.Count ?? 0));
-    }
-
-    public long LatestDatabaseUpdate = -1;
-
-    [HttpGet("/init")]
-    public IActionResult Initialize()
-    {
-        try
-        {
-            //No longer read and rewrite to json > load into memory instead:
-            
-            // Step 1: List all CSV files
-            var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
-            if (csvFiles.Length == 0)
-                return NotFound("No CSV files found.");
-
-            // Step 2: Find the file with the highest numeric suffix (yyyyMMdd)
-            var latestInfo = csvFiles
-                .Select(f => new
-                {
-                    Path = f,
-                    DateNum = GetTrailingNumber(Path.GetFileNameWithoutExtension(f))
-                })
-                .Where(x => x.DateNum != null)
-                .OrderByDescending(x => x.DateNum)
-                .FirstOrDefault();
-            if (latestInfo is null)
-                return NotFound("Failed finding latest database files");
-            var latestFile = latestInfo.Path;
-            if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
-                return Ok("Database updated!");
-            LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
-            
-            if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
-                latestFile = string.Empty;
-
-            // Step 3: Read CSV
-            var lines = System.IO.File.ReadAllLines(latestFile);
-
-            //Initialize list
-            LoadedPriceInfo ??= [];
-
-            // Assuming CSV columns are comma-separated
-            foreach (var line in lines.Skip(1)) // skip header
-            {
-                var cols = line.Split(',');
-                if (cols.Length < 10) continue;
-
-                if (int.TryParse(cols[0], out var sku) &&
-                    decimal.TryParse(cols[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
-                {
-                    if (!LoadedPriceInfo.TryAdd(sku, price))
-                        LoadedPriceInfo[sku] = price;
-                }
-            }
-            
-            // Step 7: Return OK
-            return Ok(new
-            {
-                Message = "Initialization completed; Database updated!"
-            });
-        }
-        catch (Exception ex)
-        {
-            return StatusCode(500, $"Initialization failed: {ex.Message}\r\n{ex.StackTrace}");
-        }
+        return Results.Ok(new DatabaseInfo((int)LatestDatabaseUpdate, LoadedPriceInfo?.Count ?? 0));
     }
 
     private static long? GetTrailingNumber(string fileName)
