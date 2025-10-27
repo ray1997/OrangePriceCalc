@@ -44,10 +44,10 @@ public static class OrangeAPICore
                 .OrderByDescending(x => x.DateNum)
                 .FirstOrDefault();
             if (latestInfo is null)
-                return Results.NotFound<string>("Failed finding latest database files");
+                return Results.Json("Failed finding latest database files", AppJsonContext.Default.String);
             var latestFile = latestInfo.Path;
             if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
-                return Results.Ok<string>("Database updated!");
+                return Results.Json("Database updated!", AppJsonContext.Default.String);
             LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
 
             if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
@@ -74,7 +74,7 @@ public static class OrangeAPICore
             }
 
             // Step 7: Return OK
-            return Results.Ok<string>("Initialization completed; Database updated!");
+            return Results.Json("Database updated!", AppJsonContext.Default.String);
         }
         catch
         {
