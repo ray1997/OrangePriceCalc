@@ -1,4 +1,4 @@
-using System.ComponentModel;
+using System.Globalization;
 
 namespace OrangeWebAPI.Helper;
 
@@ -16,7 +16,7 @@ public static class Config
         if (!File.Exists(ConfigPath))
         {
             using var sw = File.CreateText(ConfigPath);
-            sw.Write(defaultEmptyFile);
+            sw.Write(DefaultEmptyFile);
             sw.Close();
         }
 
@@ -41,16 +41,26 @@ public static class Config
 
         try
         {
-            var converter = TypeDescriptor.GetConverter(typeof(T));
-            if (converter != null && converter.CanConvertFrom(typeof(string)))
-                return (T)converter.ConvertFromString(raw)!;
-        }
-        catch { /* ignore parse errors */ }
+            object? result = typeof(T) switch
+            {
+                var t when t == typeof(string) => raw,
+                var t when t == typeof(int) => int.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var i) ? i : defaultValue,
+                var t when t == typeof(bool) => bool.TryParse(raw, out var b) ? b : defaultValue,
+                var t when t == typeof(decimal) => decimal.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var d) ? d : defaultValue,
+                var t when t == typeof(double) => double.TryParse(raw, NumberStyles.Any, CultureInfo.InvariantCulture, out var f) ? f : defaultValue,
+                var t when t == typeof(DateTime) => DateTime.TryParse(raw, CultureInfo.InvariantCulture, DateTimeStyles.None, out var dt) ? dt : defaultValue,
+                _ => defaultValue
+            };
 
-        return defaultValue;
+            return (T)result!;
+        }
+        catch
+        {
+            return defaultValue;
+        }
     }
 
-    private const string defaultEmptyFile = $"""
+    private const string DefaultEmptyFile = $"""
                                             {nameof(OrangeController.LatestJsonPath)}=/storage/media/configs/n8n/database/latest.json
                                             {nameof(OrangeController.DatabasePath)}=/storage/media/configs/n8n/database/
                                             """;

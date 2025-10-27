@@ -9,7 +9,7 @@ namespace OrangeWebAPI;
 [Route("/api")]
 public class OrangeController : ControllerBase
 {
-    public record BasicPriceInfo(int sku, decimal price);
+    public record BasicPriceInfo(int Sku, decimal Price);
 
     private string _databasePath = string.Empty;
     public string DatabasePath
@@ -17,7 +17,7 @@ public class OrangeController : ControllerBase
         get
         {
             if (string.IsNullOrEmpty(_databasePath))
-                _databasePath = Helper.Config.Get(nameof(DatabasePath), "/storage/media/configs/n8n/database/");
+                _databasePath = Config.Get(nameof(DatabasePath), "/storage/media/configs/n8n/database/");
 
             return _databasePath;
         }
@@ -30,7 +30,7 @@ public class OrangeController : ControllerBase
         get
         {
             if (string.IsNullOrEmpty(_latestJsonPath))
-                _latestJsonPath = Helper.Config.Get(nameof(LatestJsonPath), "/storage/media/configs/n8n/database/latest.json");
+                _latestJsonPath = Config.Get(nameof(LatestJsonPath), "/storage/media/configs/n8n/database/latest.json");
             return _latestJsonPath;
         }
     }
@@ -64,7 +64,10 @@ public class OrangeController : ControllerBase
                 .Where(x => x.DateNum != null)
                 .OrderByDescending(x => x.DateNum)
                 .FirstOrDefault()?.Path;
-
+            
+            if (string.IsNullOrEmpty(latestFile))
+                latestFile = string.Empty;
+            
             if (latestFile == latestReadName)
                 return Ok("Server updated!");
             
