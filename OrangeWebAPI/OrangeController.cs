@@ -21,68 +21,64 @@ public static class OrangeAPICore
     }
 
     private static long LatestDatabaseUpdate = -1;
-    
+
     public static IResult Initialize()
     {
         try
-    {
-        //No longer read and rewrite to json > load into memory instead:
-
-        // Step 1: List all CSV files
-        var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
-        if (csvFiles.Length == 0)
-            return Results.NoContent();
-
-        // Step 2: Find the file with the highest numeric suffix (yyyyMMdd)
-        var latestInfo = csvFiles
-            .Select(f => new
-            {
-                Path = f,
-                DateNum = GetTrailingNumber(Path.GetFileNameWithoutExtension(f))
-            })
-            .Where(x => x.DateNum != null)
-            .OrderByDescending(x => x.DateNum)
-            .FirstOrDefault();
-        if (latestInfo is null)
-            return Results.NotFound("Failed finding latest database files");
-        var latestFile = latestInfo.Path;
-        if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
-            return Results.Ok("Database updated!");
-        LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
-
-        if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
-            latestFile = string.Empty;
-
-        // Step 3: Read CSV
-        var lines = System.IO.File.ReadAllLines(latestFile);
-
-        //Initialize list
-        LoadedPriceInfo ??= [];
-
-        // Assuming CSV columns are comma-separated
-        foreach (var line in lines.Skip(1)) // skip header
         {
-            var cols = line.Split(',');
-            if (cols.Length < 10) continue;
+            //No longer read and rewrite to json > load into memory instead:
+            // Step 1: List all CSV files
+            var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
+            if (csvFiles.Length == 0)
+                return Results.NoContent();
 
-            if (int.TryParse(cols[0], out var sku) &&
-                decimal.TryParse(cols[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
+            // Step 2: Find the file with the highest numeric suffix (yyyyMMdd)
+            var latestInfo = csvFiles
+                .Select(f => new
+                {
+                    Path = f,
+                    DateNum = GetTrailingNumber(Path.GetFileNameWithoutExtension(f))
+                })
+                .Where(x => x.DateNum != null)
+                .OrderByDescending(x => x.DateNum)
+                .FirstOrDefault();
+            if (latestInfo is null)
+                return Results.NotFound("Failed finding latest database files");
+            var latestFile = latestInfo.Path;
+            if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
+                return Results.Ok("Database updated!");
+            LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
+
+            if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
+                latestFile = string.Empty;
+
+            // Step 3: Read CSV
+            var lines = System.IO.File.ReadAllLines(latestFile);
+
+            //Initialize list
+            LoadedPriceInfo ??= [];
+
+            // Assuming CSV columns are comma-separated
+            foreach (var line in lines.Skip(1)) // skip header
             {
-                if (!LoadedPriceInfo.TryAdd(sku, price))
-                    LoadedPriceInfo[sku] = price;
+                var cols = line.Split(',');
+                if (cols.Length < 10) continue;
+
+                if (int.TryParse(cols[0], out var sku) &&
+                    decimal.TryParse(cols[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
+                {
+                    if (!LoadedPriceInfo.TryAdd(sku, price))
+                        LoadedPriceInfo[sku] = price;
+                }
             }
-        }
 
-        // Step 7: Return OK
-        return Results.Ok(new
+            // Step 7: Return OK
+            return Results.Ok("Initialization completed; Database updated!");
+        }
+        catch
         {
-            Message = "Initialization completed; Database updated!"
-        });
-    }
-    catch
-    {
-        return Results.StatusCode(500);
-    }
+            return Results.StatusCode(500);
+        }
     }
 
     public static IResult GetPriceInfo(decimal PriceOrSKU)
@@ -98,7 +94,7 @@ public static class OrangeAPICore
         return Results.Ok(0);
     }
 
-    private record DatabaseInfo(int UpdateDate, int Items);
+    public record DatabaseInfo(int UpdateDate, int Items);
 
     public static IResult GetDatabaseInfo()
     {
