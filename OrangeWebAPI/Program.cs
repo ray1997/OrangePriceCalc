@@ -13,16 +13,16 @@ builder.Services.AddRateLimiter(options =>
             factory => new FixedWindowRateLimiterOptions()
             {
                 AutoReplenishment = true,
-                PermitLimit = 2,
-                Window = TimeSpan.FromMilliseconds(500)
+                PermitLimit = 3,
+                Window = TimeSpan.FromSeconds(1)
             });
     });
 });
 //builder.Services.AddControllers();
 var app = builder.Build();
+app.UseRateLimiter();
 
 app.MapGet("/api/init", () => OrangeAPICore.Initialize());
 app.MapGet("/api/dbinfo", () => OrangeAPICore.GetDatabaseInfo());
 app.MapGet("/api/{priceOrSku:decimal}", (decimal priceOrSku) => OrangeAPICore.GetPriceInfo(priceOrSku));
-
 app.Run();
