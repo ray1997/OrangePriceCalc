@@ -35,6 +35,8 @@ public class OrangeController : ControllerBase
         }
     }
 
+    private const string ReadingIndicatorFile = "latest.read";
+
     [Route("init")]
     [HttpGet]
     public IActionResult Initialize()
@@ -43,14 +45,14 @@ public class OrangeController : ControllerBase
         {
             var latestReadName = string.Empty;
             DirectoryInfo di = new DirectoryInfo(DatabasePath);
-            var readInfo = di.GetFiles("latest.read");
+            var readInfo = di.GetFiles(ReadingIndicatorFile);
             if (readInfo.Length > 0)
             {
                 latestReadName = System.IO.File.ReadAllText(readInfo[0].FullName);
             }
             else if (readInfo.Length == 0)
             {
-                System.IO.File.WriteAllText(di.FullName + "/latest.json", string.Empty);
+                System.IO.File.WriteAllText(Path.Combine(di.FullName, ReadingIndicatorFile), string.Empty);
                 latestReadName = string.Empty;
             }
             
@@ -70,11 +72,11 @@ public class OrangeController : ControllerBase
                 .OrderByDescending(x => x.DateNum)
                 .FirstOrDefault()?.Path;
             
-            if (string.IsNullOrEmpty(latestFile))
+            if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
                 latestFile = string.Empty;
             
             if (latestFile == latestReadName)
-                return Ok("Server updated!");
+                return Ok("Server database updated!");
             
             // Step 3: Read CSV
             var lines = System.IO.File.ReadAllLines(latestFile);
@@ -96,7 +98,7 @@ public class OrangeController : ControllerBase
 
             // Step 4 + 6: Save to latest.json
             var json = JsonSerializer.Serialize(items, AppJsonContext.Default.ListBasicPriceInfo);
-            System.IO.File.WriteAllText(_latestJsonPath, json);
+            System.IO.File.WriteAllText(LatestJsonPath, json);
             
             //Save latest read info
             System.IO.File.WriteAllText(readInfo.First().FullName, latestFile);
