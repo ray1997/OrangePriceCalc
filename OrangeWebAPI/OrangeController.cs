@@ -37,6 +37,26 @@ public class OrangeController : ControllerBase
 
     private const string ReadingIndicatorFile = "latest.read";
 
+    [Route("/latestUpdate")]
+    [HttpGet]
+    public IActionResult LatestUpdate()
+    {
+        var latestReadName = string.Empty;
+        DirectoryInfo di = new DirectoryInfo(DatabasePath);
+        var readInfo = di.GetFiles(ReadingIndicatorFile);
+        if (readInfo.Length > 0)
+        {
+            latestReadName = System.IO.File.ReadAllText(readInfo[0].FullName);
+        }
+        else if (readInfo.Length == 0)
+        {
+            latestReadName = string.Empty;
+        }
+
+        var latestUpdate = GetTrailingNumber(latestReadName);
+        return Ok(latestUpdate.HasValue ? latestUpdate : string.Empty);
+    }
+
     [Route("init")]
     [HttpGet]
     public IActionResult Initialize()
@@ -94,6 +114,11 @@ public class OrangeController : ControllerBase
                     items.Add(new BasicPriceInfo(sku, price));
                 }
             }
+            
+            /*using var fs = File.Create(latestJsonPath + ".gz");
+               using var gzip = new System.IO.Compression.GZipStream(fs, System.IO.Compression.CompressionLevel.SmallestSize);
+               await JsonSerializer.SerializeAsync(gzip, items, AppJsonContext.Default.ListBasicPriceInfo);
+               */
 
             // Step 4 + 6: Save to latest.json
             var json = JsonSerializer.Serialize(items, AppJsonContext.Default.ListBasicPriceInfo);
@@ -124,7 +149,9 @@ public class OrangeController : ControllerBase
     private static long? GetTrailingNumber(string fileName)
     {
         // Extract last 8 digits (yyyyMMdd)
-        var digits = new string(fileName.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
-        return long.TryParse(digits, out var num) ? num : null;
+        var name = Path.GetFileNameWithoutExtension(fileName);
+        var extractedName = name[^8..];
+        //var digits = new string(fileName.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
+        return long.TryParse(extractedName, out var num) ? num : null;
     }
 }
