@@ -48,6 +48,11 @@ public class OrangeController : ControllerBase
             {
                 latestReadName = System.IO.File.ReadAllText(readInfo[0].FullName);
             }
+            else if (readInfo.Length == 0)
+            {
+                System.IO.File.WriteAllText(di.FullName + "/latest.json", string.Empty);
+                latestReadName = string.Empty;
+            }
             
             // Step 1: List all CSV files
             var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
@@ -106,7 +111,7 @@ public class OrangeController : ControllerBase
         }
         catch (Exception ex)
         {
-            return StatusCode(500, $"Initialization failed: {ex.Message}");
+            return StatusCode(500, $"Initialization failed: {ex.Message}\r\n{ex.StackTrace}");
         }
     }
 
