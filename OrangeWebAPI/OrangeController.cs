@@ -52,7 +52,6 @@ public class OrangeController : ControllerBase
             }
             else if (readInfo.Length == 0)
             {
-                System.IO.File.WriteAllText(Path.Combine(di.FullName, ReadingIndicatorFile), string.Empty);
                 latestReadName = string.Empty;
             }
             
@@ -101,7 +100,12 @@ public class OrangeController : ControllerBase
             System.IO.File.WriteAllText(LatestJsonPath, json);
             
             //Save latest read info
-            System.IO.File.WriteAllText(readInfo.First().FullName, latestFile);
+            using var file = System.IO.File.Open(Path.Combine(di.FullName, ReadingIndicatorFile), 
+                System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite);
+            using var writer = new StreamWriter(file);
+            writer.Write(latestFile);
+            writer.Close();
+            file.Close();
 
             // Step 7: Return OK
             return Ok(new
