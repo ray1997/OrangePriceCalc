@@ -22,6 +22,7 @@ public static class OrangeAPICore
 
     private static long LatestDatabaseUpdate = -1;
 
+    public record InitializeStatus(string message);
     public static IResult Initialize()
     {
         try
@@ -43,10 +44,10 @@ public static class OrangeAPICore
                 .OrderByDescending(x => x.DateNum)
                 .FirstOrDefault();
             if (latestInfo is null)
-                return Results.NotFound("Failed finding latest database files");
+                return Results.NotFound(new InitializeStatus("Failed finding latest database files"));
             var latestFile = latestInfo.Path;
             if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
-                return Results.Ok("Database updated!");
+                return Results.Ok(new InitializeStatus("Database updated!"));
             LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
 
             if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
@@ -73,7 +74,7 @@ public static class OrangeAPICore
             }
 
             // Step 7: Return OK
-            return Results.Ok("Initialization completed; Database updated!");
+            return Results.Ok(new InitializeStatus("Initialization completed; Database updated!"));
         }
         catch
         {
@@ -88,7 +89,7 @@ public static class OrangeAPICore
         if (PriceOrSKU is >= 60000000.00m and <= 61000000.00m && decimal.IsInteger(PriceOrSKU))
         {
             if (!LoadedPriceInfo.ContainsKey((int)PriceOrSKU))
-                return Results.NotFound("Database don't have this item price info");
+                return Results.NotFound(new InitializeStatus("Database don't have this item price info"));
             return Results.Ok(LoadedPriceInfo[(int)PriceOrSKU]);
         }
         return Results.Ok(0);
