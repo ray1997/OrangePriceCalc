@@ -61,7 +61,7 @@ public static class Config
     }
 
     private const string DefaultEmptyFile = $"""
-                                            {nameof(OrangeController.LatestJsonPath)}=/storage/media/configs/n8n/database/latest.json
+                                            # Location to listing all CSV files and eventually load the latest one
                                             {nameof(OrangeController.DatabasePath)}=/storage/media/configs/n8n/database/
                                             """;
 

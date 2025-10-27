@@ -1,5 +1,4 @@
 using System.Globalization;
-using System.Text.Json;
 using Microsoft.AspNetCore.Mvc;
 using OrangeWebAPI.Helper;
 
@@ -9,7 +8,7 @@ namespace OrangeWebAPI;
 [Route("/api")]
 public class OrangeController : ControllerBase
 {
-    public record BasicPriceInfo(int Sku, decimal Price);
+    public Dictionary<int, decimal>? LoadedPriceInfo { get; set; }
 
     private string _databasePath = string.Empty;
     public string DatabasePath
@@ -23,57 +22,36 @@ public class OrangeController : ControllerBase
         }
     }
 
-
-    private string _latestJsonPath = string.Empty;
-    public string LatestJsonPath
+    [HttpGet("/{PriceOrSKU:decimal}")]
+    public IActionResult Get(decimal PriceOrSKU)
     {
-        get
+        if (LoadedPriceInfo == null)
+            return NoContent();
+        if (PriceOrSKU is >= 60000000.00m and <= 61000000.00m && decimal.IsInteger(PriceOrSKU))
         {
-            if (string.IsNullOrEmpty(_latestJsonPath))
-                _latestJsonPath = Config.Get(nameof(LatestJsonPath), "/storage/media/configs/n8n/database/latest.json");
-            return _latestJsonPath;
+            if (!LoadedPriceInfo.ContainsKey((int)PriceOrSKU))
+                return NotFound("Database don't have this item price info");
+            return Ok(LoadedPriceInfo[(int)PriceOrSKU]);
         }
+        return Ok(0);
     }
 
-    private const string ReadingIndicatorFile = "latest.read";
+    private record DatabaseInfo(int UpdateDate, int Items);
 
-    [Route("/latestUpdate")]
-    [HttpGet]
+    [HttpGet("/dbinfo")]
     public IActionResult LatestUpdate()
     {
-        var latestReadName = string.Empty;
-        DirectoryInfo di = new DirectoryInfo(DatabasePath);
-        var readInfo = di.GetFiles(ReadingIndicatorFile);
-        if (readInfo.Length > 0)
-        {
-            latestReadName = System.IO.File.ReadAllText(readInfo[0].FullName);
-        }
-        else if (readInfo.Length == 0)
-        {
-            latestReadName = string.Empty;
-        }
-
-        var latestUpdate = GetTrailingNumber(latestReadName);
-        return Ok(latestUpdate.HasValue ? latestUpdate : string.Empty);
+        return Ok(new DatabaseInfo((int)LatestDatabaseUpdate, LoadedPriceInfo?.Count ?? 0));
     }
 
-    [Route("init")]
-    [HttpGet]
+    public long LatestDatabaseUpdate = -1;
+
+    [HttpGet("/init")]
     public IActionResult Initialize()
     {
         try
         {
-            var latestReadName = string.Empty;
-            DirectoryInfo di = new DirectoryInfo(DatabasePath);
-            var readInfo = di.GetFiles(ReadingIndicatorFile);
-            if (readInfo.Length > 0)
-            {
-                latestReadName = System.IO.File.ReadAllText(readInfo[0].FullName);
-            }
-            else if (readInfo.Length == 0)
-            {
-                latestReadName = string.Empty;
-            }
+            //No longer read and rewrite to json > load into memory instead:
             
             // Step 1: List all CSV files
             var csvFiles = Directory.GetFiles(DatabasePath, "*.CSV");
@@ -81,7 +59,7 @@ public class OrangeController : ControllerBase
                 return NotFound("No CSV files found.");
 
             // Step 2: Find the file with the highest numeric suffix (yyyyMMdd)
-            var latestFile = csvFiles
+            var latestInfo = csvFiles
                 .Select(f => new
                 {
                     Path = f,
@@ -89,18 +67,22 @@ public class OrangeController : ControllerBase
                 })
                 .Where(x => x.DateNum != null)
                 .OrderByDescending(x => x.DateNum)
-                .FirstOrDefault()?.Path;
+                .FirstOrDefault();
+            if (latestInfo is null)
+                return NotFound("Failed finding latest database files");
+            var latestFile = latestInfo.Path;
+            if (latestInfo.DateNum.HasValue && latestInfo.DateNum.Value == LatestDatabaseUpdate)
+                return Ok("Database updated!");
+            LatestDatabaseUpdate = latestInfo.DateNum ?? -1;
             
             if (string.IsNullOrEmpty(latestFile)) //No CSV already thrown NotFound, this should never happen
                 latestFile = string.Empty;
-            
-            if (latestFile == latestReadName)
-                return Ok("Server database updated!");
-            
+
             // Step 3: Read CSV
             var lines = System.IO.File.ReadAllLines(latestFile);
-            
-            var items = new List<BasicPriceInfo>();
+
+            //Initialize list
+            LoadedPriceInfo ??= [];
 
             // Assuming CSV columns are comma-separated
             foreach (var line in lines.Skip(1)) // skip header
@@ -111,33 +93,15 @@ public class OrangeController : ControllerBase
                 if (int.TryParse(cols[0], out var sku) &&
                     decimal.TryParse(cols[10], NumberStyles.Any, CultureInfo.InvariantCulture, out var price))
                 {
-                    items.Add(new BasicPriceInfo(sku, price));
+                    if (!LoadedPriceInfo.TryAdd(sku, price))
+                        LoadedPriceInfo[sku] = price;
                 }
             }
             
-            /*using var fs = File.Create(latestJsonPath + ".gz");
-               using var gzip = new System.IO.Compression.GZipStream(fs, System.IO.Compression.CompressionLevel.SmallestSize);
-               await JsonSerializer.SerializeAsync(gzip, items, AppJsonContext.Default.ListBasicPriceInfo);
-               */
-
-            // Step 4 + 6: Save to latest.json
-            var json = JsonSerializer.Serialize(items, AppJsonContext.Default.ListBasicPriceInfo);
-            System.IO.File.WriteAllText(LatestJsonPath, json);
-            
-            //Save latest read info
-            using var file = System.IO.File.Open(Path.Combine(di.FullName, ReadingIndicatorFile), 
-                System.IO.FileMode.Create, System.IO.FileAccess.Write, System.IO.FileShare.ReadWrite);
-            using var writer = new StreamWriter(file);
-            writer.Write(latestFile);
-            writer.Close();
-            file.Close();
-
             // Step 7: Return OK
             return Ok(new
             {
-                Message = "Initialization completed.",
-                CsvFile = Path.GetFileName(latestFile),
-                ItemCount = items.Count
+                Message = "Initialization completed; Database updated!"
             });
         }
         catch (Exception ex)
