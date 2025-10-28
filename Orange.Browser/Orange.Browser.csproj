@@ -12,5 +12,7 @@
 
     <ItemGroup>
         <ProjectReference Include="..\Orange\Orange.csproj"/>
+        <PackageReference Include="SkiaSharp" />
+        <PackageReference Include="SkiaSharp.NativeAssets.WebAssembly" />
     </ItemGroup>
 </Project>
