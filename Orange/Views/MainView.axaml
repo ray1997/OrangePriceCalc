@@ -5,12 +5,50 @@
              xmlns:vm="clr-namespace:Orange.ViewModels"
              mc:Ignorable="d" d:DesignWidth="800" d:DesignHeight="450"
              x:Class="Orange.Views.MainView"
-             x:DataType="vm:MainViewModel">
+             x:DataType="vm:MainViewModel" Loaded="CallInitializer">
   <Design.DataContext>
     <!-- This only sets the DataContext for the previewer in an IDE,
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
-    <vm:MainViewModel />
+    <vm:MainViewModel x:Name="ViewModel"/>
   </Design.DataContext>
 
-  <TextBlock Text="{Binding Greeting}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+  <Grid Margin="12" RowDefinitions="Auto,*,Auto">
+      <Grid ColumnDefinitions="*,*,*">
+          <TextBlock Text="ลด" FontSize="18" FontWeight="Bold"/>
+          <TextBlock Text="ระยะเวลา" Grid.Column="1" FontSize="18" FontWeight="Bold" TextAlignment="Center"/>
+          <TextBlock Text="ราคา" Grid.Column="2" FontSize="18" FontWeight="Bold" TextAlignment="Center"/>
+      </Grid>
+          <!--Price display-->
+        <ListBox Grid.Row="1" ItemsSource="{Binding Steps}" SelectionMode="Single" IsHitTestVisible="False"
+                 SelectedIndex="{Binding Highlighter}" Background="Transparent">
+            <ListBox.ItemContainerTheme>
+                <ControlTheme TargetType="ListBoxItem" 
+                              BasedOn="{StaticResource {x:Type ListBoxItem}}"
+                              x:DataType="vm:DiscountStep">
+                    <Setter Property="IsSelected" Value="{Binding InRange}"/>
+                </ControlTheme>
+            </ListBox.ItemContainerTheme>
+            <ListBox.ItemTemplate>
+                <DataTemplate x:DataType="vm:DiscountStep">
+                    <Grid ColumnDefinitions="*,*,*">
+                        <TextBlock Text="{Binding PercentageDisplay}" TextAlignment="Left"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Range}" TextAlignment="Center"/>
+                        <TextBlock Grid.Column="2" Text="{Binding DiscountedPrice}" TextAlignment="Center"/>
+                    </Grid>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+        
+        <!--Value input-->
+        <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
+
+            <TextBlock Text="ราคาเริ่มต้น: " VerticalAlignment="Center"/>
+            <!--Placeholder=="ใส่ตัวเลขราคาสินค้าต้นฉบับ..." -->
+            <TextBox Text="{Binding PriceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                     Grid.Row="0" Grid.Column="1" Margin="0,5"/>
+
+            <TextBlock Text="วันที่เริ่มป้ายส้ม: " Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+            <DatePicker Grid.Column="1" Grid.Row="1" SelectedDate="{Binding DateInput, Mode=TwoWay}"/>
+        </Grid>
+    </Grid>
 </UserControl>
