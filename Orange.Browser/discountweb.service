@@ -1,0 +1,11 @@
+[Unit]
+Description=Discount calculator webapp
+After=network.target
+
+[Service]
+WorkingDirectory=/home/dietpi/discountwww
+ExecStart/home/dietpi/.dotnet/tools/dotnet-serve -p 5002 -d .
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
