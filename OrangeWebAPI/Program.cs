@@ -18,9 +18,18 @@ builder.Services.AddRateLimiter(options =>
             });
     });
 });
+builder.Services.AddCors(options =>
+{
+    options.AddPolicy("AllowBrowserApp", policy =>
+    {
+        policy.WithOrigins("https://dcalc.toonwk.uk").AllowAnyMethod().AllowAnyHeader();
+        policy.WithOrigins("https://dcalcdev.toonwk.uk").AllowAnyMethod().AllowAnyHeader();
+    });
+});
 //builder.Services.AddControllers();
 var app = builder.Build();
 app.UseRateLimiter();
+app.UseCors("AllowBrowserApp");
 
 app.MapGet("/api/init", () => OrangeAPICore.Initialize());
 app.MapGet("/api/dbinfo", () => OrangeAPICore.GetDatabaseInfo());

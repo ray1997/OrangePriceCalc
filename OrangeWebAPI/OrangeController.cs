@@ -81,20 +81,6 @@ public static class OrangeAPICore
         }
     }
 
-    public class DiscountSteps(decimal initialPrice)
-    {
-        public decimal InitialPrice { get; private set; } = initialPrice;
-
-        public decimal FirstStep { get; private set; } = Calculate(initialPrice, 0.3m);
-        public decimal SecondStep { get; private set; } = Calculate(initialPrice, 0.5m);
-        public decimal ThirdStep { get; private set; } = Calculate(initialPrice, 0.7m);
-        public decimal ForthStep { get; private set; } = Calculate(initialPrice, 0.95m);
-
-        private static decimal Calculate(decimal price, decimal discount)
-        {
-            return Math.Round(price - (price * discount), MidpointRounding.AwayFromZero);
-        }
-    }
     public static IResult GetPriceInfo(decimal PriceOrSKU)
     {
         if (LoadedPriceInfo == null)
@@ -106,7 +92,8 @@ public static class OrangeAPICore
                 Results.Json("Database don't have this item price info", AppJsonContext.Default.String) : 
                 Results.Json(LoadedPriceInfo[(int)PriceOrSKU], AppJsonContext.Default.Decimal);
         }
-        return Results.Json(new DiscountSteps(PriceOrSKU), AppJsonContext.Default.DiscountSteps);
+
+        return Results.NoContent();
     }
 
     public record DatabaseInfo(int UpdateDate, int Items);
