@@ -14,6 +14,8 @@ public partial class MainViewModel : ViewModelBase
     public MainViewModel()
     {
         UpdateSteps(0, DateTime.Today.AddDays(-1));
+        MinYear = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(700));
+        MaxYear = DateTimeOffset.Now.Add(TimeSpan.FromDays(700));
     }
 
     public void UpdateSteps(decimal fullPrice, DateTime beginDiscount)
@@ -111,6 +113,9 @@ public partial class MainViewModel : ViewModelBase
 
     [ObservableProperty] DateTimeOffset? dateInput = DateTimeOffset.Now.Subtract(TimeSpan.FromDays(1));
 
+    [ObservableProperty] private DateTimeOffset? _minYear = DateTimeOffset.MinValue;
+    [ObservableProperty] private DateTimeOffset? _maxYear = DateTimeOffset.MaxValue;
+    
     partial void OnDateInputChanged(DateTimeOffset? value)
     {
         if (value is null)

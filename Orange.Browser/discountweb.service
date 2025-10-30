@@ -4,8 +4,7 @@ After=network.target
 
 [Service]
 WorkingDirectory=/home/dietpi/discountwww
-ExecStart/home/dietpi/.dotnet/tools/dotnet-serve -p 5002 -d .
-Restart=on-failure
+ExecStart/home/dietpi/.dotnet/tools/dotnet-serve -p 5002 -d:.
 
 [Install]
 WantedBy=multi-user.target
