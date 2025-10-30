@@ -59,7 +59,7 @@
 
             <TextBlock Text="Begin: " Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Classes="TableContent"/>
             <DatePicker Grid.Column="1" Grid.Row="1" SelectedDate="{Binding DateInput, Mode=TwoWay}"
-                        MonthFormat="MM" MinYear="{Binding MinYear}" MaxYear="{Binding MaxYear}"/>
+                        MonthFormat="MMMM (MM)" MinYear="{Binding MinYear}" MaxYear="{Binding MaxYear}"/>
         </Grid>
     </Grid>
 </UserControl>
