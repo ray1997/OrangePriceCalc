@@ -11,12 +11,22 @@
          to set the actual DataContext for runtime, set the DataContext property in code (look at App.axaml.cs) -->
     <vm:MainViewModel x:Name="ViewModel"/>
   </Design.DataContext>
+    <UserControl.Styles>
+        <Style Selector="TextBlock.TableTitle">
+            <Setter Property="FontSize" Value="18"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+        <Style Selector="TextBlock.TableContent">
+            <Setter Property="TextAlignment" Value="Center"/>
+        </Style>
+    </UserControl.Styles>
 
   <Grid Margin="12" RowDefinitions="Auto,*,Auto">
       <Grid ColumnDefinitions="*,*,*">
-          <TextBlock Text="ลด" FontSize="18" FontWeight="Bold"/>
-          <TextBlock Text="ระยะเวลา" Grid.Column="1" FontSize="18" FontWeight="Bold" TextAlignment="Center"/>
-          <TextBlock Text="ราคา" Grid.Column="2" FontSize="18" FontWeight="Bold" TextAlignment="Center"/>
+          <TextBlock Text="Step" Classes="TableTitle" TextAlignment="Left"/>
+          <TextBlock Text="Range" Grid.Column="1" Classes="TableTitle"/>
+          <TextBlock Text="Price" Grid.Column="2" Classes="TableTitle"/>
       </Grid>
           <!--Price display-->
         <ListBox Grid.Row="1" ItemsSource="{Binding Steps}" SelectionMode="Single" IsHitTestVisible="False"
@@ -31,9 +41,9 @@
             <ListBox.ItemTemplate>
                 <DataTemplate x:DataType="vm:DiscountStep">
                     <Grid ColumnDefinitions="*,*,*">
-                        <TextBlock Text="{Binding PercentageDisplay}" TextAlignment="Left"/>
-                        <TextBlock Grid.Column="1" Text="{Binding Range}" TextAlignment="Center"/>
-                        <TextBlock Grid.Column="2" Text="{Binding DiscountedPrice}" TextAlignment="Center"/>
+                        <TextBlock Text="{Binding PercentageDisplay}" Classes="TableContent" TextAlignment="Left"/>
+                        <TextBlock Grid.Column="1" Text="{Binding Range}" Classes="TableContent"/>
+                        <TextBlock Grid.Column="2" Text="{Binding DiscountedPrice}" Classes="TableContent"/>
                     </Grid>
                 </DataTemplate>
             </ListBox.ItemTemplate>
@@ -42,12 +52,12 @@
         <!--Value input-->
         <Grid Grid.Row="2" RowDefinitions="Auto,Auto" ColumnDefinitions="Auto,*">
 
-            <TextBlock Text="ราคาเริ่มต้น: " VerticalAlignment="Center"/>
+            <TextBlock Text="Full price: " VerticalAlignment="Center" Classes="TableContent"/>
             <!--Placeholder=="ใส่ตัวเลขราคาสินค้าต้นฉบับ..." -->
             <TextBox Text="{Binding PriceInput, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
                      Grid.Row="0" Grid.Column="1" Margin="0,5"/>
 
-            <TextBlock Text="วันที่เริ่มป้ายส้ม: " Grid.Row="1" Grid.Column="0" VerticalAlignment="Center"/>
+            <TextBlock Text="Begin: " Grid.Row="1" Grid.Column="0" VerticalAlignment="Center" Classes="TableContent"/>
             <DatePicker Grid.Column="1" Grid.Row="1" SelectedDate="{Binding DateInput, Mode=TwoWay}"/>
         </Grid>
     </Grid>

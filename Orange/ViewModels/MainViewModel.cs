@@ -67,26 +67,20 @@ public partial class MainViewModel : ViewModelBase
     
     partial void OnPriceInputChanged(string value)
     {
-        RefreshSteps(value, DateInput?.DateTime ?? DateTime.Today);
+        _ = RefreshStepsAsync(value, DateInput?.DateTime ?? DateTime.Today);
     }
 
-    private void RefreshSteps(string value, DateTime time)
+    private async Task RefreshStepsAsync(string value, DateTime time)
     {
         if (value.Length == 8 && value.StartsWith("60"))
         {
             //SKU
-            Task.Run(async () =>
-            {
-                var validSku = int.TryParse(value, out var sku);
-                if (!validSku)
-                {
-                    return;
-                }
-
-                var actualPrice = await HttpRequestor.GetPriceFromSKU(sku);
-                UpdateSteps(actualPrice, time);
+            var validSku = int.TryParse(value, out var sku);
+            if (!validSku)
                 return;
-            });
+
+            var actualPrice = await HttpRequestor.GetPriceFromSKU(sku);
+            UpdateSteps(actualPrice, time);
             return;
         }
 
@@ -122,7 +116,7 @@ public partial class MainViewModel : ViewModelBase
         if (value is null)
             return;
         
-        RefreshSteps(PriceInput, value.Value.DateTime);
+        _ = RefreshStepsAsync(PriceInput, value.Value.DateTime);
     }
 
     [ObservableProperty] private ObservableCollection<DiscountStep> steps = [];
