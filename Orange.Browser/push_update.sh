@@ -1,0 +1,1 @@
+rsync -avz --progress ~/RiderProjects/OrangePriceCalc/Orange.Browser/bin/Release/net9.0-browser/publish/wwwroot dietpi@192.168.1.160:~/discountwww/
