@@ -1,4 +1,6 @@
 using System.Globalization;
+using System.Text.Json;
+using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
 using OrangeWebAPI.Helper;
 
@@ -112,4 +114,82 @@ public static class OrangeAPICore
         //var digits = new string(fileName.Reverse().TakeWhile(char.IsDigit).Reverse().ToArray());
         return long.TryParse(extractedName, out var num) ? num : null;
     }
+
+    private enum InputMode
+    {
+        Price,
+        SKU,
+        Indetermine
+    }
+    public static IResult QueryDiscountInfo(decimal priceOrSku, int begin)
+    {
+        if (LoadedPriceInfo is null)
+            return Results.NoContent();
+        
+        //Decide if this is price or SKU
+        if (priceOrSku >= 60000000 && decimal.IsInteger(priceOrSku) && priceOrSku <= 61000000)
+        {
+            //SKU
+            var sku = Convert.ToInt32(priceOrSku);
+            priceOrSku = LoadedPriceInfo[sku];
+        }
+
+        var validBeginDiscount = DateOnly.TryParseExact(begin.ToString(), "yyyyMMdd", out var beginDiscountDO);
+        if (!validBeginDiscount)
+            return Results.NoContent();
+        var beginDiscount = new DateTime(beginDiscountDO, TimeOnly.MinValue);
+        
+        var steps = new List<DiscountStep>();
+        for (var i = 1; i < 8; i++)
+        {
+            var dcrInfo = GetDiscountRange(beginDiscount, i - 1); //Discount range info
+            steps.Add(new DiscountStep(priceOrSku, GetDiscountSteps(i), dcrInfo.range, dcrInfo.withinRange));
+        }
+        return Results.Json(steps, AppJsonContext.Default.ListDatabaseInfo);
+    }
+
+    private record DiscountStep(decimal FullPrice, decimal Percent, string Range, bool InRange)
+    {
+        public decimal DiscountedPrice => Math.Ceiling(FullPrice - (FullPrice * Percent));
+
+        public string PercentageDisplay
+        {
+            get
+            {
+                var result = $"{Percent * 100}%";
+                return result == "100%" ? "-" : result;
+            }
+        }
+    }
+
+    private static (string range, bool withinRange) GetDiscountRange(DateTime originalDate, int from, int to = -1)
+    {
+        var begin = from == 0 ? originalDate : originalDate.AddMonths(from).AddDays(1);
+        if (to == -1)
+            to = from + 1;
+        var end = originalDate.AddMonths(to);
+        if (from == 0)
+            end = end.AddDays(1);
+
+        var today = DateTime.Today;
+        var inRange = today > begin && today < end;
+        
+        if (from == 0 && to == 1) //First month
+        {
+            return ($"{begin:dd/MM/yyyy} - {end:dd/MM/yyyy}", inRange);
+        }
+        
+        return to == int.MaxValue ? //Expiry date
+            ($"{begin:dd/MM/yyyy}", inRange) : ($"{begin:dd/MM/yyyy} - {end:dd/MM/yyyy}", inRange);
+    }
+    
+    private static decimal GetDiscountSteps(int step) =>
+        step switch
+        {
+            1 => 0.3m,
+            2 => 0.5m,
+            3 or 4 or 5 => 0.7m,
+            6 => 0.95m,
+            _ => 1m
+        };
 }
