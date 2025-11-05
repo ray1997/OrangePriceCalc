@@ -124,8 +124,8 @@ public static class OrangeAPICore
         if (!validPrice)
             return Results.NoContent();
 
-        var validDate = DateTime.TryParse(initialBegin, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal,
-            out var begin);
+        var validDate = DateTime.TryParseExact(initialBegin, "yyyyMMdd", 
+            CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var begin);
         if (!validDate)
             return Results.NoContent();
 
