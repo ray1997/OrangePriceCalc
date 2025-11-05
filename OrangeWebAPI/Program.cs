@@ -1,6 +1,7 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
 using OrangeWebAPI;
+using OrangeWebAPI.Helper;
 
 var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddRateLimiter(options =>
@@ -27,6 +28,11 @@ builder.Services.AddCors(options =>
         policy.WithOrigins("https://dcalcdev.toonwk.uk").AllowAnyMethod().AllowAnyHeader();
     });
 });
+builder.Services.ConfigureHttpJsonOptions(options =>
+{
+    options.SerializerOptions.WriteIndented = true;
+    options.SerializerOptions.TypeInfoResolverChain.Insert(0, AppJsonContext.Default);
+});
 //builder.Services.AddControllers();
 var app = builder.Build();
 app.UseRateLimiter();
@@ -37,5 +43,5 @@ app.MapGet("/api/dbinfo", () => OrangeAPICore.GetDatabaseInfo());
 app.MapGet("/api/{priceOrSku:decimal}", (decimal priceOrSku) => OrangeAPICore.GetPriceInfo(priceOrSku));
 app.MapGet("/api/{priceOrSKU}/{begin}",
     (string priceOrSKU, string begin) => OrangeAPICore.QueryDiscountInfo(priceOrSKU, begin));
-app.MapGet("api/query", ([FromBody] OrangeAPICore.QueryInfo query) => OrangeAPICore.QueryDiscountInfo(query));
+app.MapPost("api/query", (OrangeAPICore.QueryInfo query) => OrangeAPICore.QueryDiscountInfo(query));
 app.Run();

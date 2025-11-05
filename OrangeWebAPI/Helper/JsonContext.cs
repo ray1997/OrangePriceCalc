@@ -4,6 +4,7 @@ namespace OrangeWebAPI.Helper;
 
 [JsonSerializable(typeof(OrangeAPICore.DatabaseInfo))]
 [JsonSerializable(typeof(List<OrangeAPICore.DatabaseInfo>))]
+[JsonSerializable(typeof(OrangeAPICore.QueryInfo))]
 [JsonSerializable((typeof(string)))]
 [JsonSerializable((typeof(decimal)))]
 [JsonSourceGenerationOptions(WriteIndented = true)]
