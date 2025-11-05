@@ -132,7 +132,7 @@ public static class OrangeAPICore
             return Results.NoContent();
 
         var validDate = DateTime.TryParseExact(initialBegin, "yyyyMMdd", 
-            CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal, out var begin);
+            CultureInfo.InvariantCulture, DateTimeStyles.None, out var begin);
         if (!validDate)
             return Results.NoContent();
 
