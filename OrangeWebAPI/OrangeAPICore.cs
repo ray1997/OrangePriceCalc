@@ -177,7 +177,7 @@ public static class OrangeAPICore
             end = end.AddDays(1);
 
         var today = DateTime.Today;
-        var inRange = today > begin && today < end;
+        var inRange = today >= begin && today <= end;
         
         if (from == 0 && to == 1) //First month
         {
