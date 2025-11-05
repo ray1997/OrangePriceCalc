@@ -1,4 +1,5 @@
 using System.Threading.RateLimiting;
+using Microsoft.AspNetCore.Mvc;
 using OrangeWebAPI;
 
 var builder = WebApplication.CreateBuilder(args);
@@ -36,4 +37,5 @@ app.MapGet("/api/dbinfo", () => OrangeAPICore.GetDatabaseInfo());
 app.MapGet("/api/{priceOrSku:decimal}", (decimal priceOrSku) => OrangeAPICore.GetPriceInfo(priceOrSku));
 app.MapGet("/api/{priceOrSKU}/{begin}",
     (string priceOrSKU, string begin) => OrangeAPICore.QueryDiscountInfo(priceOrSKU, begin));
+app.MapGet("api/query", ([FromBody] OrangeAPICore.QueryInfo query) => OrangeAPICore.QueryDiscountInfo(query));
 app.Run();
