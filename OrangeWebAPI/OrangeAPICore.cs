@@ -115,35 +115,33 @@ public static class OrangeAPICore
         return long.TryParse(extractedName, out var num) ? num : null;
     }
 
-    private enum InputMode
-    {
-        Price,
-        SKU,
-        Indetermine
-    }
-    public static IResult QueryDiscountInfo(decimal priceOrSku, int begin)
+    public static IResult QueryDiscountInfo(string initialPrice, string initialBegin)
     {
         if (LoadedPriceInfo is null)
             return Results.NoContent();
         
+        var validPrice = decimal.TryParse(initialPrice, NumberStyles.Any, CultureInfo.InvariantCulture, out var price);
+        if (!validPrice)
+            return Results.NoContent();
+
+        var validDate = DateTime.TryParse(initialBegin, CultureInfo.InvariantCulture, DateTimeStyles.AssumeUniversal,
+            out var begin);
+        if (!validDate)
+            return Results.NoContent();
+
         //Decide if this is price or SKU
-        if (priceOrSku >= 60000000 && decimal.IsInteger(priceOrSku) && priceOrSku <= 61000000)
+        if (price >= 60000000 && decimal.IsInteger(price) && price <= 61000000)
         {
             //SKU
-            var sku = Convert.ToInt32(priceOrSku);
-            priceOrSku = LoadedPriceInfo[sku];
+            var sku = Convert.ToInt32(price);
+            price = LoadedPriceInfo[sku];
         }
-
-        var validBeginDiscount = DateOnly.TryParseExact(begin.ToString(), "yyyyMMdd", out var beginDiscountDO);
-        if (!validBeginDiscount)
-            return Results.NoContent();
-        var beginDiscount = new DateTime(beginDiscountDO, TimeOnly.MinValue);
         
         var steps = new List<DiscountStep>();
         for (var i = 1; i < 8; i++)
         {
-            var dcrInfo = GetDiscountRange(beginDiscount, i - 1); //Discount range info
-            steps.Add(new DiscountStep(priceOrSku, GetDiscountSteps(i), dcrInfo.range, dcrInfo.withinRange));
+            var dcrInfo = GetDiscountRange(begin, i - 1); //Discount range info
+            steps.Add(new DiscountStep(price, GetDiscountSteps(i), dcrInfo.range, dcrInfo.withinRange));
         }
         return Results.Json(steps, AppJsonContext.Default.ListDatabaseInfo);
     }

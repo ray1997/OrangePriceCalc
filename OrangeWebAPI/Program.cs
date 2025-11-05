@@ -34,6 +34,6 @@ app.UseCors("AllowBrowserApp");
 app.MapGet("/api/init", () => OrangeAPICore.Initialize());
 app.MapGet("/api/dbinfo", () => OrangeAPICore.GetDatabaseInfo());
 app.MapGet("/api/{priceOrSku:decimal}", (decimal priceOrSku) => OrangeAPICore.GetPriceInfo(priceOrSku));
-app.MapGet("/api/{priceOrSKU:decimal}/{begin:int}",
-    (decimal priceOrSKU, int begin) => OrangeAPICore.QueryDiscountInfo(priceOrSKU, begin));
+app.MapGet("/api/{priceOrSKU}/{begin}",
+    (string priceOrSKU, string begin) => OrangeAPICore.QueryDiscountInfo(priceOrSKU, begin));
 app.Run();
