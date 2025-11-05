@@ -150,10 +150,10 @@ public static class OrangeAPICore
             var dcrInfo = GetDiscountRange(begin, i - 1); //Discount range info
             steps.Add(new DiscountStep(price, GetDiscountSteps(i), dcrInfo.range, dcrInfo.withinRange));
         }
-        return Results.Json(steps, AppJsonContext.Default.ListDatabaseInfo);
+        return Results.Json(steps, AppJsonContext.Default.ListDiscountStep);
     }
 
-    private record DiscountStep(decimal FullPrice, decimal Percent, string Range, bool InRange)
+    public record DiscountStep(decimal FullPrice, decimal Percent, string Range, bool InRange)
     {
         public decimal DiscountedPrice => Math.Ceiling(FullPrice - (FullPrice * Percent));
 
