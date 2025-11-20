@@ -117,11 +117,6 @@ public static class OrangeAPICore
 
     public record QueryInfo(string Price, string Date);
 
-    public static IResult QueryDiscountInfo([FromBody] QueryInfo info)
-    {
-        return QueryDiscountInfo(info.Price, info.Date);
-    }
-
     public static IResult QueryDiscountInfo(string initialPrice, string initialBegin)
     {
         if (LoadedPriceInfo is null)
