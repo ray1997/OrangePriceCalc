@@ -1,6 +1,6 @@
 using System.Text.Json.Serialization;
 
-namespace OrangeWebAPI.Helper;
+namespace DiscountCalcAPI.Helper;
 
 [JsonSerializable(typeof(OrangeAPICore.DatabaseInfo))]
 [JsonSerializable(typeof(OrangeAPICore.QueryInfo))]

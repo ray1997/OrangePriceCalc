@@ -1,6 +1,6 @@
 using System.Globalization;
 
-namespace OrangeWebAPI.Helper;
+namespace DiscountCalcAPI.Helper;
 
 public static class Config
 {

@@ -1,10 +1,10 @@
 using System.Globalization;
 using System.Text.Json;
+using DiscountCalcAPI.Helper;
 using Microsoft.AspNetCore.Http.HttpResults;
 using Microsoft.AspNetCore.Mvc;
-using OrangeWebAPI.Helper;
 
-namespace OrangeWebAPI;
+namespace DiscountCalcAPI;
 
 public static class OrangeAPICore
 {

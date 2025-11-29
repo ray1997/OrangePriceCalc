@@ -1,7 +1,7 @@
 using System.Threading.RateLimiting;
 using Microsoft.AspNetCore.Mvc;
-using OrangeWebAPI;
-using OrangeWebAPI.Helper;
+using DiscountCalcAPI;
+using DiscountCalcAPI.Helper;
 using Swashbuckle.AspNetCore;
 
 var builder = WebApplication.CreateBuilder(args);
